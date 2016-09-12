@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="idcard_engine_20160322">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/idcard_engine_20160322.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

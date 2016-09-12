@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- camera -->
+    <string name="camera_open_error">请在设置中开启相机权限！</string>
+    <string name="camera_indicator">请将身份证放入框内后拍照！</string>
+    <string name="camera_take_picture_error">拍照失败</string>
+
+    <!-- recognize -->
+    <string name="reco_dialog_title">提示</string>
+    <string name="reco_dialog_blur">图像无法识别，请将身份证水平放于框内进行拍摄</string>
+    <string name="reco_dialog_imei">该设备未授权！！！</string>
+    <string name="reco_dialog_cdma">请使用CDMA制式设备</string>
+    <string name="reco_dialog_time_out">引擎已过期！！</string>
+    <string name="reco_dialog_engine_init">引擎初始化失败！！</string>
+    <string name="reco_dialog_fail_copy">请勿使用复印件</string>
+    <string name="reco_dialog_licens">授权失败！</string>
+
+</resources>
