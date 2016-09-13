@@ -1,9 +1,10 @@
 package lib.kingja.ocr;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,7 +14,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yunmai.android.engine.OcrEngine;
@@ -35,11 +35,17 @@ import java.util.List;
  */
 public class KCamera extends Activity implements SurfaceHolder.Callback, View.OnClickListener {
     private CameraManager mCameraManager;
+    public static final int REQUEST_CODE_KCAMERA=100;
     private List<String> flashList;
     private int flashPostion = 0;
     private byte[] idcardA = null;//身份证图片信息
     private String TAG = getClass().getSimpleName();
     private IDCard idCard;//身份证数据信息
+    private ImageView mIvFlash;
+    private ImageView mIvPhoto;
+    private SurfaceView mCameraPreview;
+    private SurfaceHolder mSurfaceHolder;
+    private String cardImgBase64;
     private Handler mHandler = new Handler() {
 
         @Override
@@ -56,15 +62,8 @@ public class KCamera extends Activity implements SurfaceHolder.Callback, View.On
         }
 
     };
+    private ProgressDialog mProgressDialog;
 
-    private ImageView mIvFlash;
-    private ImageView mIvPhoto;
-    private SurfaceView mCameraPreview;
-    private ScreenSetting mCameraScreenSetting;
-    private TextView mCameraI;
-    private TextView mTip;
-    private SurfaceHolder mSurfaceHolder;
-    private String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,11 +77,9 @@ public class KCamera extends Activity implements SurfaceHolder.Callback, View.On
     private void initView() {
         mIvFlash = (ImageView) findViewById(R.id.iv_flash);
         mIvPhoto = (ImageView) findViewById(R.id.iv_photo);
-
         mCameraPreview = (SurfaceView) findViewById(R.id.camera_preview);
-        mCameraScreenSetting = (ScreenSetting) findViewById(R.id.camera_screen_setting);
-        mCameraI = (TextView) findViewById(R.id.camera_i);
-        mTip = (TextView) findViewById(R.id.tv_tip);
+        mProgressDialog = new ProgressDialog(this);
+
     }
 
     private void initData() {
@@ -96,6 +93,7 @@ public class KCamera extends Activity implements SurfaceHolder.Callback, View.On
 
 
     private void onRecogn() {
+        mProgressDialog.show();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -205,15 +203,12 @@ public class KCamera extends Activity implements SurfaceHolder.Callback, View.On
     private void saveCardImg2SD(byte[] data) {
         Bitmap cardBitmap = null;
         try {
-//            cardBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-
-
             String cardImgPath =  OCRUtil.getFilePath("OCR", new Date().toString(), "jpg", KCamera.this);
             cardBitmap= OCRUtil.compressScaleFromF2B(data);
-
             File imageFile = new File(cardImgPath);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(imageFile));
             cardBitmap.compress(Bitmap.CompressFormat.JPEG, 75, bos);
+            cardImgBase64=OCRUtil.bitmapToBase64(cardBitmap);
             bos.flush();
             bos.close();
 
@@ -222,7 +217,6 @@ public class KCamera extends Activity implements SurfaceHolder.Callback, View.On
         } finally {
             if (cardBitmap != null) {
                 cardBitmap.recycle();
-                cardBitmap = null;
             }
         }
     }
@@ -232,6 +226,7 @@ public class KCamera extends Activity implements SurfaceHolder.Callback, View.On
 
         @Override
         public void handleMessage(Message msg) {
+            mProgressDialog.dismiss();
             switch (msg.what) {
                 case OcrEngine.RECOG_FAIL:
                     Toast.makeText(KCamera.this, R.string.reco_dialog_blur, Toast.LENGTH_SHORT).show();
@@ -246,7 +241,7 @@ public class KCamera extends Activity implements SurfaceHolder.Callback, View.On
                     intent.putExtra("sex", idCard.getSex());
                     intent.putExtra("birth", idCard.getBirth());
                     intent.putExtra("address", idCard.getAddress());
-                    intent.putExtra("img", url);//TODO 压缩身份证并转成Base64格式
+                    intent.putExtra("img", cardImgBase64);//TODO 压缩身份证并转成Base64格式
                     setResult(RESULT_OK, intent);
                     finish();
                     break;
@@ -275,4 +270,10 @@ public class KCamera extends Activity implements SurfaceHolder.Callback, View.On
         }
 
     };
+
+    public static void GoCamera(Activity activity) {
+        Intent intent = new Intent(activity, KCamera.class);
+        activity.startActivityForResult(intent,REQUEST_CODE_KCAMERA);
+    }
+
 }

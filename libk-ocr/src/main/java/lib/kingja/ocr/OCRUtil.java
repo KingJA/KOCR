@@ -52,7 +52,16 @@ public class OCRUtil {
         return mLogDir.getAbsolutePath()+File.separator+fileName+"."+extName;
     }
 
-
+    /**
+     * base64转为bitmap
+     *
+     * @param base64Data
+     * @return
+     */
+    public static Bitmap base64ToBitmap(String base64Data) {
+        byte[] bytes = Base64.decode(base64Data, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+    }
 
     /**
      * bitmap转为base64
